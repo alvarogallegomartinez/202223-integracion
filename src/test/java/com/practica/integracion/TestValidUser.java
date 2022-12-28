@@ -46,4 +46,22 @@ public class TestValidUser {
         ordered.verify(mockAuthDao).getAuthData(validUser.getId());
         ordered.verify(mockGenericDao).getSomeData(validUser, "where id=" + validId);
     }
+    
+    @Test
+    public void testStopRemoteSystemWithValidUserAndSystem() throws Exception {
+        User validUser = new User("1", "Ana", "Lopez", "Madrid", new ArrayList<>(Arrays.asList(1, 2)));
+        when(mockAuthDao.getAuthData(validUser.getId())).thenReturn(validUser);
+
+        String validId = "12345";
+        ArrayList<Object> lista = new ArrayList<>(Arrays.asList("uno", "dos"));
+        when(mockGenericDao.getSomeData(validUser, "where id=" + validId)).thenReturn(lista);
+
+        InOrder ordered = inOrder(mockAuthDao, mockGenericDao);
+        SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
+
+        Collection<Object> retorno = manager.stopRemoteSystem(validUser.getId(), validId);
+        assertEquals(retorno.toString(), "[uno, dos]");
+        ordered.verify(mockAuthDao).getAuthData(validUser.getId());
+        ordered.verify(mockGenericDao).getSomeData(validUser, "where id=" + validId);
+    }
 }
