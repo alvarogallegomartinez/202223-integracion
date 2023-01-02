@@ -142,5 +142,4 @@ public class TestValidUser {
         Exception ex = assertThrows(SystemManagerException.class,() -> manager.deleteRemoteSystem(validUser.getId(), remoteId));
         assertEquals(ex.getMessage(), "cannot delete remote: does remote exists?");
     }
-
 }
