@@ -60,85 +60,35 @@ public class TestInvalidUser {
 	}
 
 	@Test
-	public void testAddRemoteSystemWithInvalidUserAndSystem1() throws Exception {
-		User validUser = new User("1", "Ana", "Lopez", "Madrid", new ArrayList<>(Arrays.asList(1, 2)));
-		when(mockAuthDao.getAuthData(validUser.getId())).thenReturn(validUser);
+	public void testAddRemoteSystemWithInvalidUserAndSystem() throws Exception {
+		when(mockAuthDao.getAuthData("1")).thenReturn(null);
 
 		ArrayList<Object> remote = new ArrayList<>(Arrays.asList("uno", "dos"));
-		when(mockGenericDao.updateSomeData(validUser, remote)).thenReturn(true);
+		when(mockGenericDao.updateSomeData(null, remote)).thenThrow(OperationNotSupportedException.class);
 
 		InOrder ordered = inOrder(mockAuthDao, mockGenericDao);
 		SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
 
-		assertDoesNotThrow(() -> manager.addRemoteSystem(validUser.getId(), remote));
+		assertThrows(SystemManagerException.class,() -> manager.addRemoteSystem("1", remote));
 
-		ordered.verify(mockAuthDao).getAuthData(validUser.getId());
-		ordered.verify(mockGenericDao).updateSomeData(validUser, remote);
+		ordered.verify(mockAuthDao).getAuthData("1");
+		ordered.verify(mockGenericDao).updateSomeData(null, remote);
 	}
 
 	@Test
-	public void testAddRemoteSystemWithInvalidUserAndSystem2() throws Exception {
-		User validUser = new User("1", "Ana", "Lopez", "Madrid", new ArrayList<>(Arrays.asList(1, 2)));
-		when(mockAuthDao.getAuthData(validUser.getId())).thenReturn(validUser);
-
-		ArrayList<Object> remote = new ArrayList<>(Arrays.asList("uno", "dos"));
-		when(mockGenericDao.updateSomeData(validUser, remote)).thenReturn(false);
+	public void testDeleteRemoteSystemWithInvalidUserAndSystem() throws Exception {
+		when(mockAuthDao.getAuthData("1")).thenReturn(null);
+		String remoteId = "12345";
+		lenient().when(mockGenericDao.deleteSomeData(null, remoteId)).thenThrow(OperationNotSupportedException.class);
 
 		InOrder ordered = inOrder(mockAuthDao, mockGenericDao);
 		SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
+		
 
-		Exception ex = assertThrows(SystemManagerException.class,() -> manager.addRemoteSystem(validUser.getId(), remote));
-		assertEquals(ex.getMessage(), "cannot add remote");
-
-		ordered.verify(mockAuthDao).getAuthData(validUser.getId());
-		ordered.verify(mockGenericDao).updateSomeData(validUser, remote);
+		assertThrows(SystemManagerException.class,() -> manager.deleteRemoteSystem("1", remoteId));
+		
+		ordered.verify(mockAuthDao).getAuthData("1");
+		ordered.verify(mockGenericDao).deleteSomeData(null, remoteId);
 	}
-
-	@Test
-	public void testDeleteRemoteSystemWithInvalidUserAndSystem1() throws Exception {
-		User validUser = new User("1", "Antonio", "Perez", "Madrid", new ArrayList<Object>());
-
-		String remoteId = "12345";
-		lenient().when(mockGenericDao.deleteSomeData(validUser, remoteId)).thenReturn(true);
-
-		SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
-
-		assertDoesNotThrow(() -> manager.deleteRemoteSystem(validUser.getId(), remoteId));
-	}
-	@Test
-	public void testDeleteRemoteSystemWithInvalidUserAndSystem2() throws Exception {
-		User validUser = new User("1", "Antonio", "Perez", "Madrid", new ArrayList<Object>());
-
-		String remoteId = "12345";
-		lenient().when(mockGenericDao.deleteSomeData(validUser, remoteId)).thenReturn(false);
-
-		SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
-
-		Exception ex = assertThrows(SystemManagerException.class,() -> manager.deleteRemoteSystem(validUser.getId(), remoteId));
-		assertEquals(ex.getMessage(), "cannot delete remote: does remote exists?");
-	}
-
-	@Test
-	public void testDeleteRemoteSystemWithInvalidUserAndSystem3() throws Exception {
-		User validUser = new User("1", "Ana", "Lopez", "Madrid", new ArrayList<>(Arrays.asList(1, 2)));
-
-		String remoteId = "12345";
-		lenient().when(mockGenericDao.deleteSomeData(validUser, remoteId)).thenReturn(true);
-
-		SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
-
-		assertDoesNotThrow(() -> manager.deleteRemoteSystem(validUser.getId(), remoteId));
-	}
-	@Test
-	public void testDeleteRemoteSystemWithInvalidUserAndSystem4() throws Exception {
-		User validUser = new User("1", "Ana", "Lopez", "Madrid", new ArrayList<>(Arrays.asList(1, 2)));
-
-		String remoteId = "12345";
-		lenient().when(mockGenericDao.deleteSomeData(validUser, remoteId)).thenReturn(false);
-
-		SystemManager manager = new SystemManager(mockAuthDao, mockGenericDao);
-
-		Exception ex = assertThrows(SystemManagerException.class,() -> manager.deleteRemoteSystem(validUser.getId(), remoteId));
-		assertEquals(ex.getMessage(), "cannot delete remote: does remote exists?");
-	}
+	
 }
